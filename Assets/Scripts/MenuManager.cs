@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using System.IO;
+using UnityEngine.EventSystems;
+
+
 
 
 public class MenuManager : MonoBehaviour
 {
     public static MenuManager Instance;
-    [SerializeField] TMP_InputField nameInput;
-    public string name;
+    public string sessionName;
+
 
     private void Awake()
     {
-        if(Instance != null)
+
+        if (Instance != null)
         {
             Destroy(gameObject);
             return; 
@@ -26,18 +28,70 @@ public class MenuManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void StartNew()
+    [System.Serializable]
+    class HighScore
     {
-        name = nameInput.text;
-        SceneManager.LoadScene(1);
+        public int highScore;
+        public string highNames;
     }
 
-    public void Exit()
+    public void SaveScore(int score)
     {
-#if UNITY_EDITOR
-        EditorApplication.ExitPlaymode();
-#else
-        Application.Quit(); // original code to quit Unity player
-#endif       
+        HighScore data = new HighScore();
+        data.highScore = score;
+        data.highNames = MenuManager.Instance.sessionName;
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
     }
+
+    public int LoadScore()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            HighScore data = JsonUtility.FromJson<HighScore>(json);
+
+            return data.highScore;
+        }
+        else
+        {
+            return 0;
+        }
+
+    }
+
+    public string LoadName()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            HighScore data = JsonUtility.FromJson<HighScore>(json);
+
+            return data.highNames;
+            
+        }
+        else
+        {
+            return "Joe";
+        }
+
+    }
+
+    public void ResetScore()
+    {
+        HighScore data = new HighScore();
+        data.highScore = 0;
+        data.highNames = "Joe";
+
+        string json = JsonUtility.ToJson(data);
+
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,11 +10,14 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
+    
+
     public Text ScoreText;
     public Text bestText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
+    private bool paused = false;
     private int m_Points;
     
     private bool m_GameOver = false;
@@ -24,6 +26,10 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (MenuManager.Instance != null)
+        {
+            bestText.text = "Best Score: " + MenuManager.Instance.LoadName() + " : " + MenuManager.Instance.LoadScore();
+        }
 
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
@@ -47,6 +53,11 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                if (MenuManager.Instance != null)
+                {
+                    MenuManager.Instance.LoadScore();
+                }
+
                 m_Started = true;
                 float randomDirection = Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
@@ -73,45 +84,22 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-        SaveScore(m_Points);
-        bestText.text = "Best Score: " + MenuManager.Instance.name + " : " + m_Points;
+        if(MenuManager.Instance != null && m_Points > MenuManager.Instance.LoadScore())
+        {
+            MenuManager.Instance.SaveScore(m_Points);
+            bestText.text = "Best Score: " + MenuManager.Instance.sessionName + " : " + m_Points;
+        }
+        
+        
 
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
 
-    [System.Serializable]
-    class HighScore
+    public void Return()
     {
-        public string highScore;
+        SceneManager.LoadScene(0);
     }
-
-    public void SaveScore(int score)
-    {
-
-        HighScore data = new HighScore();
-        data.highScore = MenuManager.Instance.name + ": "+ m_Points.ToString();
-
-        string json = JsonUtility.ToJson(data);
-
-        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
-    }
-
-    public string LoadScore()
-    {
-        string path = Application.persistentDataPath + "/savefile.json";
-
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            HighScore data = JsonUtility.FromJson<HighScore>(json);
-
-            return data.highScore;
-        }
-        else
-        {
-            return null;
-        }
-    }
+    
 
 }
