@@ -28,7 +28,7 @@ public class MainManager : MonoBehaviour
     {
         if (MenuManager.Instance != null)
         {
-            bestText.text = "Best Score: " + MenuManager.Instance.LoadName() + " : " + MenuManager.Instance.LoadScore();
+            bestText.text = "Best Score: " + MenuManager.Instance.LoadName()[0] + " : " + MenuManager.Instance.LoadScore()[0];
         }
 
         const float step = 0.6f;
@@ -84,7 +84,7 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
-        if(MenuManager.Instance != null && m_Points > MenuManager.Instance.LoadScore())
+        if(MenuManager.Instance != null && m_Points > MenuManager.Instance.LoadScore()[4])
         {
             MenuManager.Instance.SaveScore(m_Points);
             bestText.text = "Best Score: " + MenuManager.Instance.sessionName + " : " + m_Points;

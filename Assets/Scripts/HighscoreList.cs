@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class HighscoreList : MonoBehaviour
 {
-    [SerializeField] TextMeshProUGUI scores;
+    [SerializeField] TextMeshProUGUI scoresText;
 
     // Start is called before the first frame update
     void Start()
@@ -24,7 +24,14 @@ public class HighscoreList : MonoBehaviour
     {
         if(MenuManager.Instance != null)
         {
-            scores.text = MenuManager.Instance.LoadName() + ": " + MenuManager.Instance.LoadScore();
+            string[] names = MenuManager.Instance.LoadName();
+            int[] scores = MenuManager.Instance.LoadScore();
+
+            for(int i = 0; i < scores.Length; i++)
+            {
+                scoresText.text += names[i] + ": " + scores[i] + "\n";
+            }
+            
         }    
     }
 

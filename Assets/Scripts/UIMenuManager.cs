@@ -16,6 +16,7 @@ public class UIMenuManager : MonoBehaviour
 
     private void Start()
     {
+        MenuManager.Instance.LoadScore();
         UpdateText();    
     }
 
@@ -55,6 +56,10 @@ public class UIMenuManager : MonoBehaviour
 
     void UpdateText()
     {
-        scoreText.text = "Best Score: " + MenuManager.Instance.LoadName() + ": " + MenuManager.Instance.LoadScore();
+        if(MenuManager.Instance != null)
+        {
+            scoreText.text = "Best Score: " + MenuManager.Instance.LoadName()[0] + ": " + MenuManager.Instance.LoadScore()[0];
+        }
+       
     }
 }

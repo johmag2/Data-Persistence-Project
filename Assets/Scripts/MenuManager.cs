@@ -13,7 +13,10 @@ public class MenuManager : MonoBehaviour
 {
     public static MenuManager Instance;
     public string sessionName;
-
+    [SerializeField] int[] sortingNumbers = new int[5];
+    [SerializeField] string[] sortingNames = new string[5];
+    string[] defNames = new string[5];
+    int[] defScores = new int[5];
 
     private void Awake()
     {
@@ -31,22 +34,31 @@ public class MenuManager : MonoBehaviour
     [System.Serializable]
     class HighScore
     {
-        public int highScore;
-        public string highNames;
+
+        public int[] highScore = new int[5];
+        public string[] highNames = new string[5];
+       
     }
 
     public void SaveScore(int score)
     {
-        HighScore data = new HighScore();
-        data.highScore = score;
-        data.highNames = MenuManager.Instance.sessionName;
 
-        string json = JsonUtility.ToJson(data);
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        string json = File.ReadAllText(path);
+        HighScore data = JsonUtility.FromJson<HighScore>(json);
+
+    
+        InsertInArray(data.highScore, data.highNames, score, MenuManager.Instance.sessionName);
+        data.highScore = sortingNumbers;
+        data.highNames = sortingNames;
+
+        json = JsonUtility.ToJson(data);
 
         File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
     }
 
-    public int LoadScore()
+    public int[] LoadScore()
     {
         string path = Application.persistentDataPath + "/savefile.json";
 
@@ -56,15 +68,21 @@ public class MenuManager : MonoBehaviour
             HighScore data = JsonUtility.FromJson<HighScore>(json);
 
             return data.highScore;
+            
         }
         else
         {
-            return 0;
-        }
+            for (int i = 0; i < defScores.Length; i++)
+            {
+                defScores[i] = 0;
+            }
 
+            return defScores;
+        }
+        
     }
 
-    public string LoadName()
+    public string[] LoadName()
     {
         string path = Application.persistentDataPath + "/savefile.json";
 
@@ -74,11 +92,16 @@ public class MenuManager : MonoBehaviour
             HighScore data = JsonUtility.FromJson<HighScore>(json);
 
             return data.highNames;
-            
+
         }
         else
         {
-            return "Joe";
+            for (int i = 0; i < defNames.Length; i++)
+            {
+                defNames[i] = "Joe";
+            }
+
+            return defNames;
         }
 
     }
@@ -86,12 +109,43 @@ public class MenuManager : MonoBehaviour
     public void ResetScore()
     {
         HighScore data = new HighScore();
-        data.highScore = 0;
-        data.highNames = "Joe";
+        
+        for(int i = 0; i < data.highScore.Length; i++)
+        {
+            data.highScore[i] = 0;
+            data.highNames[i] = "Joe";
+        }
 
         string json = JsonUtility.ToJson(data);
 
         File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void InsertInArray(int[] numbers, string[] names, int newNumber, string newName)
+    {
+
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (newNumber > numbers[i])
+            {
+                int newIndex = i;
+
+                for (int j = numbers.Length-1; j > newIndex; j--)
+                {
+
+                    numbers[j] = numbers[j-1];
+                    names[j] = names[j-1];
+                }
+
+                numbers[newIndex] = newNumber;
+                names[newIndex] = newName;
+
+                break;
+            }
+        }
+
+        sortingNames = names;
+        sortingNumbers = numbers;
     }
 
 }
